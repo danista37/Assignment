@@ -82,7 +82,7 @@ resource "aws_subnet" "private_subnet2" {
 ####CREATE SUBNET GROUP####
 
 
-resource "aws_db_subnet_group" "private" {
+resource "aws_private_subnet_group" "private" {
   name       = "main"
   subnet_ids = ["${aws_subnet.private_subnet1.id}", "${aws_subnet.private_subnet2.id}"]
 
@@ -96,8 +96,8 @@ resource "aws_db_subnet_group" "private" {
 ######CREATE private SECURITY GROUP
 
 resource "aws_security_group" "private" {
-  name        = "mysqlallow"
-  description = "ssh allow to the mysql"
+  name        = "allow"
+  description = "ssh allow to the ec2"
   vpc_id      = "${aws_vpc.vpc.id}"
 
 
@@ -108,14 +108,7 @@ resource "aws_security_group" "private" {
     to_port     = 22
     protocol    = "tcp"
   }
-  ingress {
-    description = "MYSQL"
-    security_groups= ["${aws_security_group.web_sg1.id}", "${aws_security_group.web_sg2.id}"]
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
-  }
-
+ 
 
   egress {
     from_port   = 0
@@ -128,31 +121,6 @@ resource "aws_security_group" "private" {
     Name = "SG OF private"
   }
 }
-
-
-#### private DB OPTION GROUP
-resource "aws_db_option_group" "private" {
-  name                     = "optiongroup-test-terraform"
-  option_group_description = "Terraform Option Group"
-  engine_name              = "mysql"
-  major_engine_version     = "5.7"
-
-  option {
-    option_name = "MARIADB_AUDIT_PLUGIN"
-
-    option_settings {
-      name  = "SERVER_AUDIT_EVENTS"
-      value = "CONNECT"
-    }
-
-    option_settings    {
-          name  = "SERVER_AUDIT_FILE_ROTATIONS"
-          value = "37"
-        }
-  }
-}
-
-
 
 ### CREATE S3 Role Access
 resource "aws_s3_bucket" "some-bucket" {
@@ -236,7 +204,7 @@ resource "aws_iam_instance_profile" "some_profile" {
 
 
 
-########### START OF WEBSERVER SECTION #########
+########### START OF Ec2 SECTION #########
 
 
 #### CREATE  WEB SUBNET####### 
