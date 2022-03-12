@@ -1,4 +1,5 @@
 # Assignment
-Run the command terraform init 
-then terraform plan 
-terraform apply to create the infrastructure 
+Run the command for execution of tf code
+terraform init
+terraform plan
+terraform apply
