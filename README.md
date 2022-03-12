@@ -1,5 +1,5 @@
 # Assignment
-infra.tf conist of code <br/>
+* infra.tf conist of code <br/>
 variable.tf consist of variable which we need to have for creation of stack<br/>
 Starting with the vpc creation for both private and public subnet done <br/>
 Created s3 role access also <br/>
