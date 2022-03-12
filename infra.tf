@@ -154,22 +154,85 @@ resource "aws_db_option_group" "private" {
 
 
 
-### CREATE DB PARAMETER GROUP
-
-resource "aws_db_parameter_group" "private" {
-  name   = "privatemysql"
-  family = "mysql5.7"
-
-  parameter {
-    name  = "autocommit"
-    value = "1"
-  }
-
-  parameter {
-    name  = "binlog_error_action"
-    value = "IGNORE_ERROR"
-  }
+### CREATE S3 Role Access
+resource "aws_s3_bucket" "some-bucket" {
+  bucket = "my-bucket-name"
 }
+
+resource "aws_s3_bucket" "some_bucket" {
+  bucket = "my-bucket-name"
+  force_destroy = true
+}
+
+resource "aws_s3_bucket_public_access_block" "some_bucket_access" {
+  bucket = aws_s3_bucket.some_bucket.id
+
+  block_public_acls   = true
+  block_public_policy = true
+  ignore_public_acls  = true
+}
+
+resource "aws_iam_policy" "bucket_policy" {
+  name        = "my-bucket-policy"
+  path        = "/"
+  description = "Allow "
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Sid" : "VisualEditor0",
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:DeleteObject"
+        ],
+        "Resource" : [
+          "arn:aws:s3:::*/*",
+          "arn:aws:s3:::my-bucket-name"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "some_role" {
+  name = "my_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "some_bucket_policy" {
+  role       = aws_iam_role.some_role.name
+  policy_arn = aws_iam_policy.bucket_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "cloud_watch_policy" {
+  role       = aws_iam_role.some_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+resource "aws_iam_instance_profile" "some_profile" {
+  name = "some-profile"
+  role = aws_iam_role.some_role.name
+}
+
+
+
 
 
 
@@ -278,6 +341,7 @@ resource "aws_instance" "app_server" {
 #   ami                                  = "ami-0dc2d3e4c0f9ebd18"
   instance_type                        = "t2.micro"
 #   instance_type                        = "var.instance_type"
+  iam_instance_profile = aws_iam_instance_profile.some_profile.id
   associate_public_ip_address          = true
   key_name                             = "test"
 #  availability_zone                    = var.availability_zone
@@ -329,6 +393,7 @@ depends_on = [aws_instance.app_server]
 resource "aws_launch_configuration" "ec2" {
   image_id               = "${aws_ami_from_instance.ec2_image.id}"
   instance_type          = "t2.micro"
+  iam_instance_profile = aws_iam_instance_profile.some_profile.id
   key_name               = "test"
   security_groups        =  ["${aws_security_group.web_sg1.id}", "${aws_security_group.web_sg2.id}"]
   user_data = <<-EOF

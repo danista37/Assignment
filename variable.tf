@@ -23,24 +23,6 @@ variable "availability_zones" {
   default = ["us-east-1a", "us-east-1f", "us-east-1b", "us-east-1c"]
 }
 
-variable "database_name" {
-  description = "Value of the regions"
-  type        = string
-  default     = "newdb"
-}
-
-variable "database_user" {
-  description = "Value of the regions"
-  type        = string
-  default     = "testdb"
-}
-
-variable "database_password" {
-  description = "Value of the regions"
-  type        = string
-  default     = "welcome123"
-}
-
 
 variable "amis" {
   type = map(any)
@@ -65,4 +47,10 @@ variable "endpoint" {
   description = "Value of the endpoing"
   type        = string
   default     = ""
+}
+
+variable "bucket_name" {}
+
+variable "acl_value" {
+    default = "private"
 }
