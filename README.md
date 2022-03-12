@@ -6,7 +6,7 @@
 * Bootstrapping the ec2 with  apache and accessed using ALB attached the role also using profile <br/>
 * Scaling set up the basis of the shared condition <br/>
 # Execute the code using terraform command <br/>
-Clone the repo and execute below commands and your infra will be ready <br/>
+Clone the repo and execute below commands and your infra will be ready setup your aws cli creds on the sytem you will be executing the code<br/>
 * terraform init <br/>
 * terraform plan <br/>
 * terraform apply <br/>
